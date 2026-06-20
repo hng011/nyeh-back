@@ -1,0 +1,43 @@
+info:
+  contact: {}
+paths:
+  /auth/google/callback:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      summary: Handle Google Callback for SSO Access Token
+  /auth/google/login:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      summary: Handle Google Login with SSO
+  /healthCheck:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      summary: API Health Check
+  /me:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      summary: Admin Check
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      summary: Post to Me Check
+swagger: "2.0"
