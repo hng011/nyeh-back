@@ -39,6 +39,18 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/auth/refresh": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Refresh token rotation handler",
+                "responses": {}
+            }
+        },
         "/healthCheck": {
             "get": {
                 "consumes": [

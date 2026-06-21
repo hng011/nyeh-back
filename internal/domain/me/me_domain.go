@@ -1,4 +1,4 @@
-package domain
+package me
 
 // HealthResponse represents the JSON payload returned by the health check
 type NyehResponse struct {

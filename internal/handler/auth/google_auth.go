@@ -7,9 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"nyeh-back/internal/core"
 	"time"
-
-	c "nyeh-back/internal/core"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -24,8 +23,8 @@ func getOAuthConfig(r *http.Request) *oauth2.Config {
 	baseURL := fmt.Sprintf("%s://%s", scheme, r.Host)
 
 	return &oauth2.Config{
-		ClientID:     c.Settings.GOOGLE_OAUTH_CLIENT_ID,
-		ClientSecret: c.Settings.GOOGLE_OAUTH_CLIENT_SECRET,
+		ClientID:     core.Settings.GOOGLE_OAUTH_CLIENT_ID,
+		ClientSecret: core.Settings.GOOGLE_OAUTH_CLIENT_SECRET,
 		RedirectURL:  fmt.Sprintf("%s/api/v1/auth/google/callback", baseURL),
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 		Endpoint:     google.Endpoint,
@@ -38,7 +37,7 @@ func getOAuthConfig(r *http.Request) *oauth2.Config {
 //	@Accept		json
 //	@Produce	json
 //	@Router		/auth/google/login [get]
-func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
 	oauthConf := getOAuthConfig(r)
 
 	fmt.Println("DEBUG - Sending this Redirect URI to Google:", oauthConf.RedirectURL)
@@ -69,13 +68,13 @@ func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
 //	@Accept		json
 //	@Produce	json
 //	@Router		/auth/google/callback [get]
-func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	stateCookie, err := r.Cookie("oauth_state")
 	if err != nil || r.FormValue("state") != stateCookie.Value {
 		http.Error(w, "Invalid state parameter", http.StatusBadRequest)
 		return
 	}
-	http.SetCookie(w, &http.Cookie{Name: "oauth_state", MaxAge: -1, Path: "/"})
+	http.SetCookie(w, &http.Cookie{Name: "oauth_state", MaxAge: -1, Path: "/"}) // Remove GOOGLE OAUTH Cookie
 
 	code := r.FormValue("code")
 	if code == "" {
@@ -111,23 +110,34 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if googleUser.Email != c.Settings.GOOGLE_ALLOWED_EMAIL {
-		http.Error(w, "Unauthorized: Email address is not whitelisted", http.StatusForbidden)
+	if googleUser.Email != core.Settings.GOOGLE_ALLOWED_EMAIL {
+		http.Error(w, "Unauthorized: Unable to Login", http.StatusForbidden)
 		return
 	}
 
-	// 6. Generate the Session JWT Token
-	sessionToken, err := c.GenerateToken(googleUser.Email, r.Host)
+	// 6. Generate the Session Access Token (JWT)
+	core.GenerateAccessToken(w, googleUser.Email, r.Host)
+
+	// 7. Generate refresh token
+	TTL_REFRESH_TOKEN := core.Settings.TTL_REFRESH_TOKEN_HOURS * uint(time.Hour)
+
+	refreshToken, err := core.GenerateRefreshToken(w, time.Duration(TTL_REFRESH_TOKEN))
 	if err != nil {
-		http.Error(w, "Failed to generate session token", http.StatusInternalServerError)
+		http.Error(w, "Failed to generate refresh token", http.StatusInternalServerError)
 		return
 	}
 
-	// 7. Return the token to the client
+	// 8. Save refresh token to redis
+	err = h.sessionCache.SetSession(r.Context(), refreshToken, googleUser.Email, time.Duration(TTL_REFRESH_TOKEN))
+	if err != nil {
+		http.Error(w, "Failed to save session", http.StatusInternalServerError)
+		return
+	}
+
+	// 9. Return the JWT token to the client
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
 		"status": "authenticated",
-		"token":  sessionToken,
 	})
 }

@@ -4,19 +4,41 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	a "nyeh-back/internal/api"
-	c "nyeh-back/internal/core"
+
+	"nyeh-back/internal/api"
+	v1 "nyeh-back/internal/api/v1"
+	"nyeh-back/internal/core"
+
+	"nyeh-back/internal/infra"
+
+	// Import Handlers
+	"nyeh-back/internal/cache/redis"
+	auth "nyeh-back/internal/handler/auth"
+	me "nyeh-back/internal/handler/me"
+
 	"time"
 )
 
 func main() {
-	c.LoadEnv()
+	core.LoadEnv()
 
-	addr := fmt.Sprintf(":%v", c.Settings.PORT)
+	addr := fmt.Sprintf(":%v", core.Settings.PORT)
+
+	infra.InitRedis(
+		core.Settings.REDIS_ADDR,
+		core.Settings.REDIS_PASSWORD,
+	)
+	defer infra.RedisClient.Close()
+
+	// API V1 DI
+	v1Deps := v1.V1RouterDependencies{
+		AuthHandler: auth.NewAuthHandler(redis.NewUserSessionCache(infra.RedisClient)),
+		MeHandler:   me.NewMeHandler(),
+	}
 
 	server := &http.Server{
 		Addr:         addr,
-		Handler:      a.Setup(),
+		Handler:      api.Setup(v1Deps),
 		ReadTimeout:  10 * time.Second,  // Drop slow clients
 		WriteTimeout: 10 * time.Second,  // Drop hung responses
 		IdleTimeout:  120 * time.Second, // Clean up dead connections
@@ -24,7 +46,7 @@ func main() {
 
 	messages := []string{
 		"Setup Complete",
-		fmt.Sprintf("Mode: %v", c.Settings.ENV),
+		fmt.Sprintf("Mode: %v", core.Settings.ENV),
 		fmt.Sprintf("Server running on port %v", server.Addr),
 	}
 

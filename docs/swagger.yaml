@@ -17,6 +17,14 @@ paths:
       - application/json
       responses: {}
       summary: Handle Google Login with SSO
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      summary: Refresh token rotation handler
   /healthCheck:
     get:
       consumes:

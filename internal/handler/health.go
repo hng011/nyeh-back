@@ -1,10 +1,10 @@
-package v1
+package handler
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	c "nyeh-back/internal/core"
+	"nyeh-back/internal/core"
 	d "nyeh-back/internal/domain"
 )
 
@@ -17,7 +17,7 @@ import (
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	response := d.HealthResponse{
 		Status:  "ok",
-		Port:    fmt.Sprintf("Running on port %v", c.Settings.PORT),
+		Port:    fmt.Sprintf("Running on port %v", core.Settings.PORT),
 		Message: "API is fully operational",
 	}
 

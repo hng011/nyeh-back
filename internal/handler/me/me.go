@@ -5,8 +5,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	d "nyeh-back/internal/domain/me"
+	dm "nyeh-back/internal/domain/me"
+	"nyeh-back/internal/middleware"
 )
+
+type MeHandler struct{}
+
+func NewMeHandler() *MeHandler {
+	return &MeHandler{}
+}
 
 // AdminHandler godoc
 //
@@ -14,10 +21,18 @@ import (
 //	@Accept		json
 //	@Produce	json
 //	@Router		/me [get]
-func MeHandler(w http.ResponseWriter, r *http.Request) {
-	response := d.NyehResponse{
+func (h *MeHandler) GetMeHandler(w http.ResponseWriter, r *http.Request) {
+
+	email, ok := r.Context().Value(middleware.UserEmailKey).(string)
+
+	if !ok {
+		http.Error(w, "Unauthorized: Could not find user email", http.StatusUnauthorized)
+		return
+	}
+
+	response := dm.NyehResponse{
 		Status:  "ok",
-		Message: "YOu got the fLag",
+		Message: fmt.Sprintf("YOu %v got the fLag", email),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -31,7 +46,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request) {
 //	@Accept		json
 //	@Produce	json
 //	@Router		/me [post]
-func PostMeHandler(w http.ResponseWriter, r *http.Request) {
+func (h *MeHandler) PostMeHandler(w http.ResponseWriter, r *http.Request) {
 	// 1. Read the stream (This works because your middleware beautifully restored it!)
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -45,7 +60,7 @@ func PostMeHandler(w http.ResponseWriter, r *http.Request) {
 		payloadString = "No payload provided"
 	}
 
-	response := d.NyehResponse{
+	response := dm.NyehResponse{
 		Status:  "ok",
 		Message: fmt.Sprintf("Your request payload is: %s", payloadString),
 	}
