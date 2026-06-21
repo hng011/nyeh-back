@@ -30,7 +30,7 @@ func (h *AuthHandler) RefreshHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized: No refresh token", http.StatusUnauthorized)
 		return
 	}
-	oldRefreshToken := cookie.Value
+	oldRefreshToken := core.HashToken(cookie.Value)
 
 	// 2. validate against Redis
 	email, remainingTTL, err := h.sessionCache.GetSession(r.Context(), oldRefreshToken)

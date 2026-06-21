@@ -85,16 +85,18 @@ func GenerateRefreshToken(w http.ResponseWriter, ttl time.Duration) (string, err
 		return "", err
 	}
 
-	refresh_token := base64.URLEncoding.EncodeToString(b)
+	refreshToken := base64.URLEncoding.EncodeToString(b)
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     REFRESH_TOKEN_COOKIE_KEY,
-		Value:    refresh_token,
+		Value:    refreshToken,
 		Path:     "/",
 		Expires:  time.Now().Add(ttl),
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	})
 
-	return refresh_token, nil
+	hashedRefreshToken := HashToken(refreshToken)
+
+	return hashedRefreshToken, nil
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 )
 
 const (
@@ -16,6 +17,13 @@ const (
 
 func Setup(v1Deps v1.V1RouterDependencies) http.Handler {
 	r := chi.NewRouter()
+
+	// TODO: Parameterize this
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"*"},
+		AllowCredentials: false,
+	}))
 
 	// Global Middleware
 	r.Use(chiMiddleware.Logger)
