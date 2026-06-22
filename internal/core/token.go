@@ -4,18 +4,20 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
-	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 // GenerateToken creates a signed HS256 JWT for a whitelisted email
-func GenerateAccessToken(w http.ResponseWriter, email string, host string) {
+func GenerateAccessToken(email string, host string) (string, time.Duration, error) {
 	secretKey := []byte(Settings.JWT_AUTH_TOKEN)
 	if len(secretKey) == 0 {
-		http.Error(w, "Secret Key is Invalid", http.StatusInternalServerError)
-		return
+		return "", 0, errors.New("Unable to find the JWT_AUTH_TOKEN")
+	}
+
+	if email != Settings.GOOGLE_ALLOWED_EMAIL {
+		return "", 0, errors.New("Unauthorized email")
 	}
 
 	TTL := time.Duration(Settings.TTL_ACCESS_TOKEN_MINUTES) * time.Minute
@@ -27,21 +29,12 @@ func GenerateAccessToken(w http.ResponseWriter, email string, host string) {
 		Subject:   email,
 	}
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(secretKey)
+	access_token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(secretKey)
 	if err != nil {
-		http.Error(w, "Failed to generate session token", http.StatusInternalServerError)
-		return
+		return "", 0, errors.New("Failed to generate session token")
 	}
 
-	// STORE ACCESS_TOKEN TO COOKIE
-	http.SetCookie(w, &http.Cookie{
-		Name:     ACCESS_TOKEN_COOKIE_KEY,
-		Value:    token,
-		Path:     "/",
-		Expires:  time.Now().Add(time.Duration(TTL)),
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-	})
+	return access_token, TTL, nil
 }
 
 // ValidateToken parses and verifies the signature and expiration of a token string
@@ -69,24 +62,15 @@ func ValidateToken(tokenStr string) (*jwt.RegisteredClaims, error) {
 }
 
 // GenerateRefreshToken creates a random 32-byte opaque token
-func GenerateRefreshToken(w http.ResponseWriter, ttl time.Duration) (string, error) {
+func GenerateRefreshToken() (string, string, time.Duration, error) {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
-		return "", err
+		return "", "", 0, err
 	}
 
-	refreshToken := base64.URLEncoding.EncodeToString(b)
+	ttlRefreshToken := time.Duration(Settings.TTL_REFRESH_TOKEN_HOURS) * time.Hour
+	rawRefreshToken := base64.URLEncoding.EncodeToString(b)
+	hashedRefreshToken := HashToken(rawRefreshToken)
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     REFRESH_TOKEN_COOKIE_KEY,
-		Value:    refreshToken,
-		Path:     "/",
-		Expires:  time.Now().Add(ttl),
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-	})
-
-	hashedRefreshToken := HashToken(refreshToken)
-
-	return hashedRefreshToken, nil
+	return rawRefreshToken, hashedRefreshToken, ttlRefreshToken, nil
 }

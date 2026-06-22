@@ -39,6 +39,18 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/auth/logout": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Logout handler",
+                "responses": {}
+            }
+        },
         "/auth/refresh": {
             "post": {
                 "consumes": [

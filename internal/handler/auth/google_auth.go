@@ -115,26 +115,34 @@ func (h *AuthHandler) GoogleCallbackHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// 6. Generate the Session Access Token (JWT)
-	core.GenerateAccessToken(w, googleUser.Email, r.Host)
-
-	// 7. Generate refresh token
-	TTL_REFRESH_TOKEN := core.Settings.TTL_REFRESH_TOKEN_HOURS * uint(time.Hour)
-
-	refreshToken, err := core.GenerateRefreshToken(w, time.Duration(TTL_REFRESH_TOKEN))
+	// Generate refresh_token
+	refreshToken, hashedRefreshToken, ttlRefreshToken, err := core.GenerateRefreshToken()
 	if err != nil {
-		http.Error(w, "Failed to generate refresh token", http.StatusInternalServerError)
+		http.Error(w, "Failed to generate a refresh_token", http.StatusInternalServerError)
 		return
 	}
 
-	// 8. Save refresh token to redis
-	err = h.sessionCache.SetSession(r.Context(), refreshToken, googleUser.Email, time.Duration(TTL_REFRESH_TOKEN))
+	// Save refresh_token to redis
+	err = h.sessionCache.SetSession(r.Context(), hashedRefreshToken, googleUser.Email, ttlRefreshToken)
 	if err != nil {
-		http.Error(w, "Failed to save session", http.StatusInternalServerError)
+		http.Error(w, "Failed to store a refresh_token to cache", http.StatusInternalServerError)
 		return
 	}
 
-	// 9. Return the JWT token to the client
+	// Store refresh_token to cookie
+	setRefreshTokenCookie(w, r, refreshToken, ttlRefreshToken)
+
+	// Generate the  access_token (JWT)
+	accessToken, ttlAccessToken, err := core.GenerateAccessToken(googleUser.Email, r.Host)
+	if err != nil {
+		http.Error(w, "Failed to generate an access_token", http.StatusInternalServerError)
+		return
+	}
+
+	// Store Access Token to cookie
+	setAccessTokenCookie(w, r, accessToken, ttlAccessToken)
+
+	// Return the JWT token to the client
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{

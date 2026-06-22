@@ -42,6 +42,6 @@ func authRouter(r chi.Router, baseUrl string, authDeps *auth.AuthHandler) {
 			r.Get("/callback", authDeps.GoogleCallbackHandler)
 		})
 		r.Post("/refresh", authDeps.RefreshHandler)
-		// TODO: add logout
+		r.Post("/logout", authDeps.LogoutHandler)
 	})
 }

@@ -22,12 +22,19 @@ func RequireAuth(next http.Handler) http.Handler {
 		// 2. Validate the cookie
 		claims, err := core.ValidateToken(tokenStr.Value)
 		if err != nil {
-			// core.ValidateToken already sent the 401 response
+			http.Error(w, "Unauthorized: No access token", http.StatusUnauthorized)
+			return
+		}
+
+		// 3. Validate the email
+		var email string = claims.Subject
+		if email != core.Settings.GOOGLE_ALLOWED_EMAIL {
+			http.Error(w, "Unauthorized access_token", http.StatusUnauthorized)
 			return
 		}
 
 		// 3. Inject the identity
-		ctx := context.WithValue(r.Context(), core.JWT_CLAIM_USER_EMAIL_KEY, claims.Subject)
+		ctx := context.WithValue(r.Context(), core.JWT_CLAIM_USER_EMAIL_KEY, email)
 
 		// 4. Continue
 		next.ServeHTTP(w, r.WithContext(ctx))

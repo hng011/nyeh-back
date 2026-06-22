@@ -17,6 +17,14 @@ paths:
       - application/json
       responses: {}
       summary: Handle Google Login with SSO
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      summary: Logout handler
   /auth/refresh:
     post:
       consumes:
