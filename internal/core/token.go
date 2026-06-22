@@ -10,9 +10,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-const REFRESH_TOKEN_COOKIE_KEY string = "refresh_token"
-const ACCESS_TOKEN_COOKIE_KEY string = "access_token"
-
 // GenerateToken creates a signed HS256 JWT for a whitelisted email
 func GenerateAccessToken(w http.ResponseWriter, email string, host string) {
 	secretKey := []byte(Settings.JWT_AUTH_TOKEN)
@@ -48,22 +45,15 @@ func GenerateAccessToken(w http.ResponseWriter, email string, host string) {
 }
 
 // ValidateToken parses and verifies the signature and expiration of a token string
-func ValidateToken(w http.ResponseWriter, r *http.Request) (*jwt.RegisteredClaims, error) {
-	secretKey := []byte(Settings.JWT_AUTH_TOKEN)
+func ValidateToken(tokenStr string) (*jwt.RegisteredClaims, error) {
 
-	// 1. Get Refresh Token from httpOnly cookie
-	tokenStr, err := r.Cookie(ACCESS_TOKEN_COOKIE_KEY)
-	if err != nil {
-		http.Error(w, "Unauthorized: No access token", http.StatusUnauthorized)
-		return nil, err
-	}
-
-	token, err := jwt.ParseWithClaims(tokenStr.Value, &jwt.RegisteredClaims{}, func(t *jwt.Token) (any, error) {
+	// Validate the JWT token with the secret key
+	token, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(t *jwt.Token) (any, error) {
 		// Validate the signing algorithm is HS256
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
-		return secretKey, nil
+		return []byte(Settings.JWT_AUTH_TOKEN), nil
 	})
 
 	if err != nil {

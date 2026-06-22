@@ -26,7 +26,8 @@ func main() {
 
 	infra.InitRedis(
 		core.Settings.REDIS_ADDR,
-		core.Settings.REDIS_PASSWORD,
+		core.Settings.REDIS_USER,
+		core.Settings.REDIS_PASS,
 	)
 	defer infra.RedisClient.Close()
 

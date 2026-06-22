@@ -13,9 +13,10 @@ import (
 var RedisClient *redis.Client
 
 // InitRedis establishes the connection and pings the server to ensure it is alive.
-func InitRedis(addr string, password string) {
+func InitRedis(addr string, username string, password string) {
 	RedisClient = redis.NewClient(&redis.Options{
 		Addr:         addr,
+		Username:     username,
 		Password:     password,
 		DB:           0,
 		MinIdleConns: 5,

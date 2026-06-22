@@ -26,8 +26,9 @@ type Config struct {
 	GOOGLE_OAUTH_CLIENT_SECRET string
 
 	// REDIS
-	REDIS_ADDR     string
-	REDIS_PASSWORD string
+	REDIS_ADDR string
+	REDIS_USER string
+	REDIS_PASS string
 }
 
 var Settings *Config // Global Settings
@@ -69,7 +70,8 @@ func LoadEnv() {
 		GOOGLE_OAUTH_CLIENT_ID:     getEnv[string]("GOOGLE_OAUTH_CLIENT_ID"),
 		GOOGLE_OAUTH_CLIENT_SECRET: getEnv[string]("GOOGLE_OAUTH_CLIENT_SECRET"),
 		REDIS_ADDR:                 getEnv[string]("REDIS_ADDR"),
-		REDIS_PASSWORD:             getEnv[string]("REDIS_PASSWORD"),
+		REDIS_USER:                 getEnv[string]("REDIS_USER"),
+		REDIS_PASS:                 getEnv[string]("REDIS_PASS"),
 		TTL_ACCESS_TOKEN_MINUTES:   getEnv[uint]("TTL_ACCESS_TOKEN_MINUTES"),
 		TTL_REFRESH_TOKEN_HOURS:    getEnv[uint]("TTL_REFRESH_TOKEN_HOURS"),
 	}

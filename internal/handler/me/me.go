@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"nyeh-back/internal/core"
 	dm "nyeh-back/internal/domain/me"
-	"nyeh-back/internal/middleware"
 )
 
 type MeHandler struct{}
@@ -23,7 +23,7 @@ func NewMeHandler() *MeHandler {
 //	@Router		/me [get]
 func (h *MeHandler) GetMeHandler(w http.ResponseWriter, r *http.Request) {
 
-	email, ok := r.Context().Value(middleware.UserEmailKey).(string)
+	email, ok := r.Context().Value(core.JWT_CLAIM_USER_EMAIL_KEY).(string)
 
 	if !ok {
 		http.Error(w, "Unauthorized: Could not find user email", http.StatusUnauthorized)
