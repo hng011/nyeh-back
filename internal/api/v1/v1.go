@@ -2,9 +2,9 @@ package v1
 
 import (
 	docs "nyeh-back/docs"
-	handler "nyeh-back/internal/handler"
-	auth "nyeh-back/internal/handler/auth"
-	me "nyeh-back/internal/handler/me"
+	handler "nyeh-back/internal/handler/http"
+	auth "nyeh-back/internal/handler/http/auth"
+	me "nyeh-back/internal/handler/http/me"
 	mid "nyeh-back/internal/middleware"
 
 	"github.com/go-chi/chi/v5"
@@ -36,11 +36,9 @@ func SetupApiV1(r chi.Router, base_path string, v1Deps V1RouterDependencies) {
 
 func authRouter(r chi.Router, baseUrl string, authDeps *auth.AuthHandler) {
 	r.Route(baseUrl, func(r chi.Router) {
+		r.Get("/{provider}/login", authDeps.OAuthLoginHandler)
+		r.Get("/{provider}/callback", authDeps.OAuthCallbackHandler)
 
-		r.Route("/google", func(r chi.Router) {
-			r.Get("/login", authDeps.GoogleLoginHandler)
-			r.Get("/callback", authDeps.GoogleCallbackHandler)
-		})
 		r.Post("/refresh", authDeps.RefreshHandler)
 		r.Post("/logout", authDeps.LogoutHandler)
 	})

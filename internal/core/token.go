@@ -16,10 +16,6 @@ func GenerateAccessToken(email string, host string) (string, time.Duration, erro
 		return "", 0, errors.New("Unable to find the JWT_AUTH_TOKEN")
 	}
 
-	if email != Settings.GOOGLE_ALLOWED_EMAIL {
-		return "", 0, errors.New("Unauthorized email")
-	}
-
 	TTL := time.Duration(Settings.TTL_ACCESS_TOKEN_MINUTES) * time.Minute
 	var claims jwt.RegisteredClaims = jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(TTL)),

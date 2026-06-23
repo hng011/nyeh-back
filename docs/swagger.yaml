@@ -1,22 +1,40 @@
 info:
   contact: {}
 paths:
-  /auth/google/callback:
+  /auth/{provider}/callback:
     get:
       consumes:
       - application/json
+      parameters:
+      - description: OAuth provider
+        enum:
+        - google
+        - github
+        in: path
+        name: provider
+        required: true
+        type: string
       produces:
       - application/json
       responses: {}
-      summary: Handle Google Callback for SSO Access Token
-  /auth/google/login:
+      summary: Callback handler
+  /auth/{provider}/login:
     get:
       consumes:
       - application/json
+      parameters:
+      - description: OAuth provider
+        enum:
+        - google
+        - github
+        in: path
+        name: provider
+        required: true
+        type: string
       produces:
       - application/json
       responses: {}
-      summary: Handle Google Login with SSO
+      summary: Login handler
   /auth/logout:
     post:
       consumes:
@@ -32,7 +50,7 @@ paths:
       produces:
       - application/json
       responses: {}
-      summary: Refresh token rotation handler
+      summary: Refresh Token handler
   /healthCheck:
     get:
       consumes:

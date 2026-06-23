@@ -12,22 +12,22 @@ import (
 
 const session_key_name string = "refresh_token"
 
-type userSessionCache struct {
+type redisSessionRepo struct {
 	client *redis.Client
 }
 
-func NewUserSessionCache(client *redis.Client) da.UserSession {
-	return &userSessionCache{
+func NewRedisSessionRepo(client *redis.Client) da.UserSessionDomain {
+	return &redisSessionRepo{
 		client: client,
 	}
 }
 
-func (c *userSessionCache) SetSession(ctx context.Context, refreshToken string, email string, expiresIn time.Duration) error {
+func (c *redisSessionRepo) SetSession(ctx context.Context, refreshToken string, email string, expiresIn time.Duration) error {
 	// Prefix the key to organize redis
 	return c.client.Set(ctx, fmt.Sprintf("%v:%v", session_key_name, refreshToken), email, expiresIn).Err()
 }
 
-func (c *userSessionCache) GetSession(ctx context.Context, refreshToken string) (string, time.Duration, error) {
+func (c *redisSessionRepo) GetSession(ctx context.Context, refreshToken string) (string, time.Duration, error) {
 	key := fmt.Sprintf("%v:%v", session_key_name, refreshToken)
 
 	// 1. Get Session
@@ -53,6 +53,6 @@ func (c *userSessionCache) GetSession(ctx context.Context, refreshToken string) 
 	return val, ttl, err
 }
 
-func (c *userSessionCache) DeleteSession(ctx context.Context, refreshToken string) error {
+func (c *redisSessionRepo) DeleteSession(ctx context.Context, refreshToken string) error {
 	return c.client.Del(ctx, fmt.Sprintf("%v:%v", session_key_name, refreshToken)).Err()
 }

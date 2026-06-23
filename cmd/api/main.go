@@ -12,9 +12,10 @@ import (
 	"nyeh-back/internal/infra"
 
 	// Import Handlers
-	"nyeh-back/internal/cache/redis"
-	auth "nyeh-back/internal/handler/auth"
-	me "nyeh-back/internal/handler/me"
+	auth "nyeh-back/internal/handler/http/auth"
+	me "nyeh-back/internal/handler/http/me"
+	"nyeh-back/internal/repository/redis"
+	usecase "nyeh-back/internal/usecase/auth"
 
 	"time"
 )
@@ -33,7 +34,7 @@ func main() {
 
 	// API V1 DI
 	v1Deps := v1.V1RouterDependencies{
-		AuthHandler: auth.NewAuthHandler(redis.NewUserSessionCache(infra.RedisClient)),
+		AuthHandler: auth.NewAuthHandler(usecase.NewAuthUsecase(redis.NewRedisSessionRepo(infra.RedisClient))),
 		MeHandler:   me.NewMeHandler(),
 	}
 

@@ -28,7 +28,7 @@ func RequireAuth(next http.Handler) http.Handler {
 
 		// 3. Validate the email
 		var email string = claims.Subject
-		if email != core.Settings.GOOGLE_ALLOWED_EMAIL {
+		if email != core.Settings.ALLOWED_EMAIL {
 			http.Error(w, "Unauthorized access_token", http.StatusUnauthorized)
 			return
 		}

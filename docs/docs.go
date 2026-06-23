@@ -15,30 +15,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/google/callback": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Handle Google Callback for SSO Access Token",
-                "responses": {}
-            }
-        },
-        "/auth/google/login": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Handle Google Login with SSO",
-                "responses": {}
-            }
-        },
         "/auth/logout": {
             "post": {
                 "consumes": [
@@ -59,7 +35,57 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Refresh token rotation handler",
+                "summary": "Refresh Token handler",
+                "responses": {}
+            }
+        },
+        "/auth/{provider}/callback": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Callback handler",
+                "parameters": [
+                    {
+                        "enum": [
+                            "google",
+                            "github"
+                        ],
+                        "type": "string",
+                        "description": "OAuth provider",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/auth/{provider}/login": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Login handler",
+                "parameters": [
+                    {
+                        "enum": [
+                            "google",
+                            "github"
+                        ],
+                        "type": "string",
+                        "description": "OAuth provider",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {}
             }
         },

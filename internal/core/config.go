@@ -19,9 +19,9 @@ type Config struct {
 	TOKEN_DIGEST             string
 	TTL_ACCESS_TOKEN_MINUTES uint
 	TTL_REFRESH_TOKEN_HOURS  uint
+	ALLOWED_EMAIL            string
 
 	// GOOGLE SSO
-	GOOGLE_ALLOWED_EMAIL       string
 	GOOGLE_OAUTH_CLIENT_ID     string
 	GOOGLE_OAUTH_CLIENT_SECRET string
 
@@ -66,7 +66,7 @@ func LoadEnv() {
 		DEBUG:                      getEnv[bool]("DEBUG", false),
 		JWT_AUTH_TOKEN:             getEnv[string]("JWT_AUTH_TOKEN"),
 		TOKEN_DIGEST:               getEnv[string]("TOKEN_DIGEST"),
-		GOOGLE_ALLOWED_EMAIL:       getEnv[string]("GOOGLE_ALLOWED_EMAIL"),
+		ALLOWED_EMAIL:              getEnv[string]("ALLOWED_EMAIL"),
 		GOOGLE_OAUTH_CLIENT_ID:     getEnv[string]("GOOGLE_OAUTH_CLIENT_ID"),
 		GOOGLE_OAUTH_CLIENT_SECRET: getEnv[string]("GOOGLE_OAUTH_CLIENT_SECRET"),
 		REDIS_ADDR:                 getEnv[string]("REDIS_ADDR"),
