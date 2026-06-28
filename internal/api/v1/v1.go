@@ -4,7 +4,6 @@ import (
 	docs "nyeh-back/docs"
 	handler "nyeh-back/internal/handler/http"
 	auth "nyeh-back/internal/handler/http/auth"
-	me "nyeh-back/internal/handler/http/me"
 	mid "nyeh-back/internal/middleware"
 
 	"github.com/go-chi/chi/v5"
@@ -14,7 +13,7 @@ import (
 // RouterDependencies holds all the fully-built handlers
 type V1RouterDependencies struct {
 	AuthHandler *auth.AuthHandler
-	MeHandler   *me.MeHandler
+	BioHandler  *handler.BioHandler
 }
 
 func SetupApiV1(r chi.Router, base_path string, v1Deps V1RouterDependencies) {
@@ -27,11 +26,15 @@ func SetupApiV1(r chi.Router, base_path string, v1Deps V1RouterDependencies) {
 	r.Get("/healthCheck", handler.HealthCheckHandler)
 	authRouter(r, "/auth", v1Deps.AuthHandler)
 
+	// BIO Routes
+	r.Get("/bio", v1Deps.BioHandler.GetBioHandler)
+
 	r.Group(func(r chi.Router) {
 		r.Use(mid.RequireAuth)
-		r.Get("/me", v1Deps.MeHandler.GetMeHandler)
-		r.Post("/me", v1Deps.MeHandler.PostMeHandler)
+		r.Post("/bio", v1Deps.BioHandler.UpsertBioHandler)
+		r.Delete("/bio", v1Deps.BioHandler.DeleteBioHandler)
 	})
+
 }
 
 func authRouter(r chi.Router, baseUrl string, authDeps *auth.AuthHandler) {

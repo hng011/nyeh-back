@@ -29,6 +29,14 @@ type Config struct {
 	REDIS_ADDR string
 	REDIS_USER string
 	REDIS_PASS string
+
+	// GCP
+	GOOGLE_CLOUD_PROJECT  string
+	GOOGLE_CLOUD_LOCATION string
+
+	// FIREBASE
+	FIREBASE_FS_COLL_BIO string
+	FIREBASE_DATABASE_ID string
 }
 
 var Settings *Config // Global Settings
@@ -74,6 +82,10 @@ func LoadEnv() {
 		REDIS_PASS:                 getEnv[string]("REDIS_PASS"),
 		TTL_ACCESS_TOKEN_MINUTES:   getEnv[uint]("TTL_ACCESS_TOKEN_MINUTES"),
 		TTL_REFRESH_TOKEN_HOURS:    getEnv[uint]("TTL_REFRESH_TOKEN_HOURS"),
+		GOOGLE_CLOUD_PROJECT:       getEnv[string]("GOOGLE_CLOUD_PROJECT"),
+		GOOGLE_CLOUD_LOCATION:      getEnv[string]("GOOGLE_CLOUD_LOCATION"),
+		FIREBASE_DATABASE_ID:       getEnv[string]("FIREBASE_DATABASE_ID"),
+		FIREBASE_FS_COLL_BIO:       getEnv[string]("FIREBASE_FS_COLL_BIO"),
 	}
 }
 

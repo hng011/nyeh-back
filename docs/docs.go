@@ -89,6 +89,43 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/bio": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get Bio",
+                "responses": {}
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Upsert Bio (create and update)",
+                "parameters": [
+                    {
+                        "description": "Bio update payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.BioRequest"
+                        }
+                    }
+                ],
+                "responses": {}
+            },
+            "delete": {
+                "summary": "Delete Bio",
+                "responses": {}
+            }
+        },
         "/healthCheck": {
             "get": {
                 "consumes": [
@@ -100,27 +137,41 @@ const docTemplate = `{
                 "summary": "API Health Check",
                 "responses": {}
             }
+        }
+    },
+    "definitions": {
+        "handler.BioRequest": {
+            "type": "object",
+            "properties": {
+                "about_me": {
+                    "type": "string"
+                },
+                "address": {
+                    "type": "string"
+                },
+                "contact": {
+                    "$ref": "#/definitions/handler.ContactDTO"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         },
-        "/me": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Admin Check",
-                "responses": {}
-            },
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Post to Me Check",
-                "responses": {}
+        "handler.ContactDTO": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "github": {
+                    "type": "string"
+                },
+                "instagram": {
+                    "type": "string"
+                },
+                "linkedin": {
+                    "type": "string"
+                }
             }
         }
     }

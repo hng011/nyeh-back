@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,17 +12,20 @@ import (
 
 	"nyeh-back/internal/infra"
 
-	// Import Handlers
-	auth "nyeh-back/internal/handler/http/auth"
-	me "nyeh-back/internal/handler/http/me"
+	handler "nyeh-back/internal/handler/http"
+	handler_auth "nyeh-back/internal/handler/http/auth"
+
+	firestore "nyeh-back/internal/repository/firestore"
 	"nyeh-back/internal/repository/redis"
-	usecase "nyeh-back/internal/usecase/auth"
+	usecase "nyeh-back/internal/usecase"
 
 	"time"
 )
 
 func main() {
 	core.LoadEnv()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	addr := fmt.Sprintf(":%v", core.Settings.PORT)
 
@@ -32,10 +36,13 @@ func main() {
 	)
 	defer infra.RedisClient.Close()
 
+	firestoreClient := infra.InitFirestore(ctx)
+	defer firestoreClient.Close()
+
 	// API V1 DI
 	v1Deps := v1.V1RouterDependencies{
-		AuthHandler: auth.NewAuthHandler(usecase.NewAuthUsecase(redis.NewRedisSessionRepo(infra.RedisClient))),
-		MeHandler:   me.NewMeHandler(),
+		AuthHandler: handler_auth.NewAuthHandler(usecase.NewAuthUsecase(redis.NewRedisSessionRepo(infra.RedisClient))),
+		BioHandler:  handler.NewBioHandler(usecase.NewBioUsecase(firestore.NewFirestoreRepo(firestoreClient))),
 	}
 
 	server := &http.Server{

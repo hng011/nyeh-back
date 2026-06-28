@@ -1,4 +1,4 @@
-package auth
+package handler_auth
 
 import (
 	"context"

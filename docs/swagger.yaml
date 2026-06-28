@@ -1,3 +1,26 @@
+definitions:
+  handler.BioRequest:
+    properties:
+      about_me:
+        type: string
+      address:
+        type: string
+      contact:
+        $ref: '#/definitions/handler.ContactDTO'
+      name:
+        type: string
+    type: object
+  handler.ContactDTO:
+    properties:
+      email:
+        type: string
+      github:
+        type: string
+      instagram:
+        type: string
+      linkedin:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -51,6 +74,31 @@ paths:
       - application/json
       responses: {}
       summary: Refresh Token handler
+  /bio:
+    delete:
+      responses: {}
+      summary: Delete Bio
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      summary: Get Bio
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bio update payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.BioRequest'
+      produces:
+      - application/json
+      responses: {}
+      summary: Upsert Bio (create and update)
   /healthCheck:
     get:
       consumes:
@@ -59,19 +107,4 @@ paths:
       - application/json
       responses: {}
       summary: API Health Check
-  /me:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses: {}
-      summary: Admin Check
-    post:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses: {}
-      summary: Post to Me Check
 swagger: "2.0"
